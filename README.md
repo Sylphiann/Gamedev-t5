@@ -1,111 +1,59 @@
-# Tutorial 3 Game Development
-Introduction to Game Programming
+# Tutorial 5 Game Development
+Assets Creation & Integration
 
 Nama : Favian Naufal  
 NPM  : 2006597802
 
-## Penjelasan fitur-fitur baru karakter dalam game platformer:
+## Penjelasan Pembuatan dan Penambahan Variasi Asset
 
-1. ***Double Jump***  
+Objek baru yang dibuat adalah sebuah *Ring* atau cincin emas yang dapat di koleksi oleh karakter yang dikendalikan pemain, dengan *scene* yang digunakan seperti berikut ini:
 
-*Double jump* diimplementasikan dengan menggunakan kedua variable berikut.  
+<img src="img/image.png" alt="Description" width="500">
 
-```
-# Double jump variables
-@export var max_jumps = 2
-@export var jumps_left = max_jumps
-```
-
-Implementasi yang digunakan yaitu dengan menetapkan variable `max_jump` sebanyak dua kali, yang menandakan bahwa jumlah lompatan yang dapat dilakukan karakter di adalah dua kali: Dengan intuisi bahwa lompatan pertama di atas tanah, dan lompatan kedua saat berada di udara.  
-
-Variable `jumps_left` menentukan jumlah lompatan tersisa yang dapat dilakukan karakter, variable in digunakan agar lompatan pertama di atas tanah mengurangi jatah lompatan karakter sebanyak satu, seperti cuplikan kode berikut ini.  
+*Root node* yang digunakan adalah sebuah `Area2D`. Tipe node tersebut digunakan agar dapat diberikan sebuah child node `CollisionShape2D`, sehingga area collision dapat digunakan untuk mendeteksi *signal* `_on_body_entered()` ketika karakter pemain menyentuh objek *Ring* tersebut, dengan kode berikut ini:
 
 ```
-# Jump logic
-if Input.is_action_just_pressed("ui_up") and jumps_left > 0:
-	velocity.y = jump_speed
-	jumps_left -= 1
+extends Area2D
+
+var velocity = Vector2(0, -100)
+var is_collected = false
+
+@onready var anim_sprite = $AnimatedSprite2D
+@onready var audio_player = $AudioStreamPlayer2D
+
+func _ready():
+	anim_sprite.play("default")
+
+func _on_body_entered(body: Node2D) -> void:
+	if not is_collected:
+		audio_player.play()
+	is_collected = true
+
+
+func _process(delta):
+	if is_collected:
+		velocity.y += gravity * delta
+		global_position += velocity * delta
+
+		if velocity.y > 0 and global_position.y >= position.y:
+			await audio_player.finished
+			queue_free()
 ```
+Berdasarkan kode di atas, objek *Ring* akan memiliki *motion* terjun ke bawah seakan-akan terjun keluar *stage*, dengan makna onjek *Ring* tersebut terkoleksi oleh pemain.
 
-Tak dilupakan bahwa jatah lompatan yang dimiliki karakter kembali ter-*replenish* menjadi 2 ketika kembali atau saat menyentuh tanah
+Di sisi lain, kode tersebut juga memberikan SFX ketika objek *Ring* terkoleksi dengan menggunakan *child node* `AudioStreamPlayer2D`, serta menghapus objek dari scene ketika seluruh proses '*coin collection*' terjalankan.
 
-```
-# Reset jumps when on the floor
-if is_on_floor():
-	jumps_left = max_jumps
-```
+Sebuah *child node* `AnimatedSprite2D` juga digunakan untuk memberikan efek *looped animation* dengan menggunakan *Sprite sheet* *Ring* yang didapatkan.
+
+*Background music* yang digunakan juga diakses melalui node `AudioStreamPlayer2D` sebagai *child node* dari *main* scene, dengan BGM yang digunakan didapatkan dari *No-Copyright Music* .
 
 
-2. ***Dashing***  
+## Resource yang digunakan
 
-Logika *Dashing* yang dapat dilakukan karakter diimplementasikan dengan memberi interval kedapa karakter kapan 'terakhir kali pemain menekan *key* movement/panah kiri dana kanan', seperti yang ditunjukkan pada salah beberapa variable berikut.  
+- **Background music track yang digunakan**: Naturally by Pufino  
+Source: https://freetouse.com/music  
+No Copyright Music (Free Download)  
 
-```
-# Double tap variables
-@export var dashing_speed = 450
-@export var dash_tap_interval = 0.25
-@export var last_left_tap_time = 0
-@export var last_right_tap_time = 0
-@export var dash_slowdown_time = 1.0
-@export var is_dashing = false
-var dash_timer = 0.0
-```
+- **Rings**: https://www.spriters-resource.com/sega_genesis_32x/sonicth3/sheet/9985/
 
-Adapun *boolean* `is_dashing` yang sebagai penanda apakah karakter sedang melakukan *dashing*, serta durasi *dashing* karakter yang ditentukan sebanyak 1 detik. Berikut adalah logika yang diterapkan pada kode.  
-
-```
-if Input.is_action_pressed("ui_left"):
-	speed = -1
-	if Input.is_action_just_pressed("ui_left"):
-		if Time.get_ticks_msec() / 1000.0 - last_left_tap_time< dash_tap_interval:
-			is_dashing = true
-			dash_timer = 0.0
-		else:
-			is_dashing = false
-		last_left_tap_time = Time.get_ticks_msec() / 1000.0
-		
-elif Input.is_action_pressed("ui_right"):
-	speed =  1
-	if Input.is_action_just_pressed("ui_right"):
-		if Time.get_ticks_msec() / 1000.0 - last_right_tap_time< dash_tap_interval:
-			is_dashing = true
-			dash_timer = 0.0
-		else:
-			is_dashing = false
-		last_right_tap_time = Time.get_ticks_msec() / 1000.0
-	
-else:
-	speed = 0
-```
-
-3. ***Crouching***  
-
-```
-# Sprite node and Crouch variales
-@onready var sprite = $Sprite2D
-@onready var collision = $CollisionShape2D
-@export var crouch_multiplier = 1
-```
-
-*Crouching* diimplemntasikan dengan mengurangi *speed* karakter dengan *multiplier* `0.4` ketika *key* ***down*** digunakan oleh pemain. Dengan logika kode berikut ini:
-
-```
-# Crouch logic
-if Input.is_action_pressed("ui_down"):
-	crouch_multiplier = 0.4
-else:
-	crouch_multiplier = 1
-```
-
-Adapun efek transformasi *scale* pada `Sprite2D` karakter yang berubah terhadap `y-scale` dengan multiplier `0.75` pada trigger *key* yang sama (***down***), pada cuplikan kode berikut ini yang diterapkan pada bagian `_process()`.
-
-```
-func _process(delta: float) -> void:
-	# Crouch sprite transformation
-	if Input.is_action_pressed("ui_down"):
-		sprite.scale.y = 0.75
-		collision.scale.y = 0.75
-	else:
-		sprite.scale.y = 1.0
-		collision.scale.y = 1.0
-```
+- **Ring Collection SFX**: https://www.youtube.com/watch?v=n9GImjHkLmE
