@@ -52,3 +52,5 @@ shape = SubResource("RectangleShape2D_ptcw4")
 sprite_frames = SubResource("SpriteFrames_ksbsq")
 animation = &"idle"
 autoplay = "jalan_kanan"
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]

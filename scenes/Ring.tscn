@@ -1,0 +1,91 @@
+[gd_scene load_steps=14 format=3 uid="uid://c2monrp22v8kr"]
+
+[ext_resource type="Script" path="res://scenes/Ring.gd" id="1_6idc0"]
+[ext_resource type="Texture2D" uid="uid://byj8bsupa3ltv" path="res://assets/ring_tilesheet.png" id="1_xkeu3"]
+[ext_resource type="AudioStream" uid="uid://13nx4t862lbm" path="res://assets/Ring.mp3" id="3_jirn3"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0vl2c"]
+atlas = ExtResource("1_xkeu3")
+region = Rect2(0, 0, 341, 336)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5hmvj"]
+atlas = ExtResource("1_xkeu3")
+region = Rect2(341, 0, 341, 336)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rj545"]
+atlas = ExtResource("1_xkeu3")
+region = Rect2(682, 0, 341, 336)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gk6tf"]
+atlas = ExtResource("1_xkeu3")
+region = Rect2(1023, 0, 341, 336)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wnx2n"]
+atlas = ExtResource("1_xkeu3")
+region = Rect2(1364, 0, 341, 336)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ikoqt"]
+atlas = ExtResource("1_xkeu3")
+region = Rect2(1705, 0, 341, 336)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0x1lk"]
+atlas = ExtResource("1_xkeu3")
+region = Rect2(2046, 0, 341, 336)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n6dab"]
+atlas = ExtResource("1_xkeu3")
+region = Rect2(2387, 0, 341, 336)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_kex57"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0vl2c")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5hmvj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rj545")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gk6tf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wnx2n")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ikoqt")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0x1lk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n6dab")
+}],
+"loop": true,
+"name": &"ring",
+"speed": 12.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_75vk5"]
+radius = 99.1262
+
+[node name="Ring" type="Area2D"]
+scale = Vector2(0.15, 0.15)
+script = ExtResource("1_6idc0")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_kex57")
+animation = &"ring"
+autoplay = "ring"
+frame_progress = 0.0122737
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_75vk5")
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_jirn3")
+volume_db = -15.0
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
